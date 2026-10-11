@@ -1,0 +1,4 @@
+__pycache__/
+
+# La fuente del juego (Trajan Pro) es de Adobe y no se puede redistribuir
+fuentes/TrajanPro*
