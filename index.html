@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Civilizaciones · quiz de fans de AoE2</title>
+<link rel="icon" href="escudos/britons.png">
+<style>
+  /* Cinzel: fuente libre (SIL OFL, ver fuentes/OFL.txt) con el aire de la del juego */
+  @font-face { font-family: Cinzel; src: url("fuentes/Cinzel.ttf"); font-weight: 400 900; }
+
+  :root {
+    --bg: #100d09;
+    --bg-hi: #3a2a18;
+    --panel: #241b12;
+    --panel-hi: #382a1a;
+    --line: #5e4828;
+    --gold: #e2bb62;
+    --gold-hi: #f8de98;
+    --text: #f3eada;
+    --muted: #a6997f;
+    --ok: #6cc35f;
+    --ok-bg: #22461f;
+    --ko: #e0604f;
+    --ko-bg: #561c17;
+    --display: Cinzel, Georgia, serif;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(130% 90% at 50% -20%, var(--bg-hi), var(--bg) 65%) fixed var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, sans-serif;
+    user-select: none;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  img { display: block; }
+  :focus { outline: none; }
+  :focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; }
+  p { margin: 0; }
+  .muted { color: var(--muted); }
+
+  .screen {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    animation: fade .25s ease-out;
+  }
+
+  /* Botones */
+  .btn {
+    position: relative;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    padding: .85em 1.2em;
+    background: linear-gradient(var(--panel-hi), var(--panel));
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .07);
+    transition: border-color .12s, background .12s, transform .08s, opacity .2s;
+  }
+  .btn:hover { border-color: var(--gold); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, .45); }
+  .btn.ghost { background: none; box-shadow: none; border-color: transparent; color: var(--muted); }
+  .btn.ghost:hover { color: var(--text); border-color: var(--line); }
+  .btn.small { font-size: .9rem; padding: .45em .9em; }
+  .btn.primary { background: linear-gradient(#ecc670, #b8893a); border-color: #f5d98e; color: #24180a; }
+  .btn.primary:hover { border-color: #fff4cf; }
+
+  /* Menú */
+  .marquee {
+    overflow: hidden;
+    padding: 16px 0 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .track { display: flex; width: max-content; animation: scroll 150s linear infinite; }
+  .track img { width: 52px; height: 52px; margin-right: 16px; opacity: .5; }
+
+  .menu { gap: 14px; }
+  .kicker { font-family: var(--display); color: var(--muted); letter-spacing: .25em; font-size: .85rem; margin-bottom: -12px; }
+  .menu h1 {
+    font-size: clamp(2.2rem, 8vw, 4.2rem);
+    line-height: 1.05;
+    color: var(--gold);
+    text-shadow: 0 3px 0 #000, 0 0 40px rgba(226, 187, 98, .25);
+  }
+  .sub { color: var(--muted); text-align: center; margin-top: -6px; }
+
+  .settings { display: grid; grid-template-columns: repeat(4, auto); align-items: center; gap: 10px 14px; margin-top: 4px; }
+  .settings > span { justify-self: end; color: var(--muted); }
+  .seg { justify-self: start; display: inline-flex; gap: 2px; padding: 3px; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); border-radius: 99px; }
+  .seg button { border: 0; background: none; padding: .4em 1em; border-radius: 99px; color: var(--muted); font-weight: 600; transition: background .15s, color .15s; }
+  .seg button:hover { color: var(--text); }
+  .seg button.on { background: var(--gold); color: #24180a; }
+  .level-info { color: var(--muted); font-size: .9rem; text-align: center; margin-top: -4px; }
+
+  .section { width: 100%; display: flex; align-items: center; gap: 14px; margin-top: 4px; font-size: .9rem; letter-spacing: .2em; color: var(--muted); }
+  .section::before, .section::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--line)); }
+  .section::after { background: linear-gradient(90deg, var(--line), transparent); }
+
+  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
+  .modes.four { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .mode { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 12px; }
+  .modes.four .mode { padding: 14px 8px; }
+  .mode:hover { transform: translateY(-2px); }
+  .pics { display: flex; align-items: center; justify-content: center; gap: 8px; height: 60px; }
+  .pics img { width: 56px; height: 56px; }
+  .pics .sm { width: 44px; height: 44px; }
+  .pics .uu { border: 1px solid var(--line); border-radius: 8px; }
+  .aa { width: 56px; font-size: 1.8rem; text-align: center; color: var(--gold-hi); }
+  .ex { max-width: 120px; font-size: 1rem; color: var(--gold-hi); }
+  .arrow { font-family: system-ui, sans-serif; color: var(--muted); }
+  .mode strong { font-size: 1.15rem; }
+  .modes.four strong { font-size: 1.02rem; }
+  .mode small { font: .85rem/1.3 system-ui, sans-serif; color: var(--muted); }
+  .legal { max-width: 640px; margin-top: 18px; font-size: .75rem; line-height: 1.5; text-align: center; color: var(--muted); opacity: .8; user-select: text; }
+  .legal a { color: inherit; }
+
+  /* Partida */
+  .game { min-height: 100vh; }
+  .game.wide { max-width: 1180px; }
+  .game.waiting { cursor: pointer; }
+  .hud { width: 100%; display: flex; align-items: center; gap: 12px; }
+  .bar { flex: 1; height: 8px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, .08); }
+  .bar i { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #b8893a, var(--gold-hi)); transition: width .35s ease; }
+  .hud.inf .bar { visibility: hidden; }
+  .count { min-width: 4.5em; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pill {
+    padding: .2em .75em;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    background: rgba(0, 0, 0, .35);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .pill.hits { color: var(--ok); }
+  .pill.hot { color: var(--gold-hi); border-color: var(--gold); }
+
+  .stage { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding-bottom: 5vh; }
+  .stage.nall { gap: 16px; }
+  .ask { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .prompt { color: var(--muted); font-size: 1.05rem; }
+  .big { width: 208px; height: 208px; filter: drop-shadow(0 12px 20px rgba(0, 0, 0, .6)); transition: filter .2s; animation: pop .3s cubic-bezier(.2, .9, .3, 1.3); }
+  .n8 .big { width: 176px; height: 176px; }
+  .n12 .big { width: 150px; height: 150px; }
+  .nall .big { width: 120px; height: 120px; }
+  .was-ok .big { filter: drop-shadow(0 0 22px rgba(108, 195, 95, .7)); }
+  .mid { width: 128px; height: 128px; filter: drop-shadow(0 10px 16px rgba(0, 0, 0, .6)); animation: pop .3s cubic-bezier(.2, .9, .3, 1.3); }
+  .unit-img { width: 150px; height: 150px; border: 2px solid var(--line); border-radius: 12px; box-shadow: 0 10px 24px rgba(0, 0, 0, .55); animation: pop .3s cubic-bezier(.2, .9, .3, 1.3); }
+  .n12 .unit-img, .nall .unit-img { width: 112px; height: 112px; }
+  .title { font-size: clamp(2.1rem, 7vw, 3.4rem); line-height: 1.1; text-align: center; color: var(--gold); text-shadow: 0 3px 0 #000; animation: pop .3s cubic-bezier(.2, .9, .3, 1.3); }
+  .title.small { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+  .techline { display: flex; align-items: center; gap: 14px; }
+  .techline img { width: 52px; height: 52px; border-radius: 6px; }
+  .age-tag { margin-top: -6px; font-size: .9rem; color: var(--muted); }
+  .fx { max-width: 600px; padding: 10px 18px; font-size: 1.1rem; text-align: center; background: rgba(0, 0, 0, .3); border: 1px solid var(--line); border-radius: 10px; }
+
+  .opts { display: grid; gap: 12px; width: 100%; }
+  .opts.names, .opts.civs, .opts.texts { grid-template-columns: 1fr 1fr; max-width: 640px; }
+  .opts.n12.names, .opts.n12.civs { grid-template-columns: repeat(3, 1fr); max-width: 840px; }
+  .opts.shields { grid-template-columns: repeat(4, 1fr); max-width: 700px; }
+  .opts.n12.shields { grid-template-columns: repeat(6, 1fr); max-width: 860px; }
+  .opts.units { grid-template-columns: repeat(var(--cols, 4), 1fr); max-width: 780px; }
+  .opts.n12.units { max-width: 960px; }
+  .opts.nall { gap: 6px; max-width: none; }
+  .opts.nall.names, .opts.nall.civs { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .opts.nall.shields { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+  .opts.nall.units { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+
+  .opt { min-height: 68px; padding-inline: 3.6em; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .opts.n8 .opt, .opts.n12 .opt { min-height: 56px; }
+  .opts.texts .opt { padding-inline: 1em; }
+  .opts.shields .opt { padding: 14px 6px 10px; gap: 8px; }
+  .opts.shields img { width: 104px; height: 104px; }
+  .opts.n8.shields img { width: 92px; height: 92px; }
+  .opts.n12.shields .opt { padding: 10px 4px 8px; gap: 6px; }
+  .opts.n12.shields img { width: 80px; height: 80px; }
+  .opts.units .opt { padding: 12px 6px 10px; gap: 8px; justify-content: flex-start; }
+  .opts.units img { width: 96px; height: 96px; border-radius: 8px; }
+  .opts.n8.units img { width: 84px; height: 84px; }
+  .opts.n12.units img { width: 72px; height: 72px; }
+  .mini {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    opacity: 0;
+    transform: scale(.5);
+    transition: opacity .2s, transform .25s cubic-bezier(.2, .9, .3, 1.3);
+  }
+  .opts.n8 .mini, .opts.n12 .mini { left: 10px; width: 36px; height: 36px; margin-top: -18px; }
+  .lbl { font-size: .85rem; visibility: hidden; }
+  .opts.n12 .lbl { font-size: .72rem; }
+  .opts.units .lbl { visibility: visible; font-size: .8rem; line-height: 1.2; }
+  .opts.n12.units .lbl { font-size: .7rem; }
+  .opt kbd { position: absolute; top: 5px; right: 8px; font: 600 .7rem/1 system-ui, sans-serif; color: var(--muted); opacity: .55; }
+
+  /* Experto: todas las opciones, botones compactos */
+  .opts.nall .opt { min-height: 34px; padding: 4px 8px 4px 34px; align-items: flex-start; text-align: left; font-size: .8rem; border-width: 1px; border-radius: 6px; box-shadow: none; }
+  .opts.nall .mini { left: 6px; width: 22px; height: 22px; margin-top: -11px; }
+  .opts.nall.shields .opt { padding: 6px; align-items: center; }
+  .opts.nall.shields img { width: 56px; height: 56px; }
+  .opts.nall.units .opt { padding: 4px; align-items: center; }
+  .opts.nall.units img { width: 52px; height: 52px; border-radius: 4px; }
+  .opts.nall .lbl {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    z-index: 2;
+    transform: translate(-50%, 4px);
+    padding: 2px 8px;
+    white-space: nowrap;
+    font-size: .75rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    visibility: hidden;
+  }
+
+  .answered .opt { pointer-events: none; }
+  .opts.civs .mini, .answered .mini { opacity: 1; transform: none; }
+  .answered .lbl, .answered .opts.nall .lbl { visibility: visible; }
+  .answered .opts.shields .lbl { animation: fade .25s; }
+  .answered .opts.nall.names .dim .mini { opacity: 0; }
+  .answered .opts.nall .dim .lbl { visibility: hidden; }
+  .opt.ok { border-color: var(--ok); background: linear-gradient(#2f6328, var(--ok-bg)); }
+  .opt.ko { border-color: var(--ko); background: linear-gradient(#7a2a22, var(--ko-bg)); animation: shake .35s; }
+  .opt.dim { opacity: .6; }
+  .opts.nall .opt.dim { opacity: .4; }
+  .hint { color: var(--muted); visibility: hidden; }
+  .was-ko .hint { visibility: visible; animation: fade .3s .2s both; }
+
+  /* Resultado */
+  .end { padding-top: 6vh; gap: 14px; }
+  .score { font-family: var(--display); font-weight: 700; font-size: clamp(3.4rem, 13vw, 6rem); line-height: 1; color: var(--gold); text-shadow: 0 4px 0 #000; }
+  .score small { font-size: .45em; color: var(--muted); }
+  .age { font-size: 1.6rem; }
+  .record { color: var(--gold-hi); font-weight: 600; }
+  .misses-title { margin-top: 12px; font-size: 1.05rem; color: var(--muted); }
+  .chips, .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+  .chip { width: 124px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 10px; background: rgba(0, 0, 0, .28); border: 1px solid var(--line); border-radius: 10px; }
+  .chip img { width: 76px; height: 76px; }
+  .chip span { display: block; width: 100%; font-family: var(--display); font-weight: 700; font-size: .85rem; text-align: center; }
+  .fact { width: 290px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(0, 0, 0, .28); border: 1px solid var(--line); border-radius: 10px; }
+  .fact img { width: 52px; height: 52px; flex: none; }
+  .fact.unit img { border-radius: 6px; }
+  .fact b { display: block; font-family: var(--display); }
+  .fact small { display: block; font-size: .85rem; color: var(--muted); }
+  .fact .fx-line { margin-top: 2px; color: var(--text); font-size: .8rem; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 8px; }
+
+  /* Estudiar */
+  .study .hud h2 { flex: 1; text-align: center; font-size: 1.5rem; color: var(--gold); }
+  button.chip { transition: border-color .12s; }
+  button.chip:hover { border-color: var(--gold); }
+  .hide-names .chip:not(.show) span { position: relative; color: transparent; }
+  .hide-names .chip:not(.show) span::after { content: "?"; position: absolute; inset: 0; color: var(--muted); }
+
+  .modal { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px; background: rgba(8, 6, 4, .72); animation: fade .2s; }
+  .sheet {
+    position: relative;
+    width: min(600px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    padding: 22px 24px 24px;
+    background: linear-gradient(var(--panel-hi), var(--panel));
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+    user-select: text;
+    animation: pop .25s cubic-bezier(.2, .9, .3, 1.2);
+  }
+  .sheet .close { position: absolute; top: 10px; right: 10px; }
+  .sheet header { display: flex; align-items: center; gap: 16px; }
+  .sheet header img { width: 88px; height: 88px; }
+  .sheet header h2 { font-size: 2rem; color: var(--gold); }
+  .sheet h3 { margin: 18px 0 8px; font-size: .85rem; letter-spacing: .15em; color: var(--muted); }
+  .sheet .spec { font-family: var(--display); font-size: 1.2rem; }
+  .uu-list { display: flex; flex-wrap: wrap; gap: 12px; }
+  .uu-list figure { width: 96px; margin: 0; text-align: center; }
+  .uu-list img { width: 96px; height: 96px; border: 1px solid var(--line); border-radius: 8px; }
+  .uu-list figcaption { margin-top: 4px; font-size: .8rem; }
+  .techs { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .techs li { display: flex; align-items: flex-start; gap: 12px; }
+  .techs img { width: 36px; height: 36px; flex: none; border-radius: 4px; }
+  .techs b { display: block; font-family: var(--display); }
+  .techs span { font-size: .9rem; color: var(--muted); }
+
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes pop { from { opacity: 0; transform: scale(.85); } }
+  @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  @media (max-width: 860px) {
+    .settings { grid-template-columns: auto auto; }
+    .modes.four { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .modes, .modes.four { grid-template-columns: 1fr; }
+    .opts.names, .opts.civs, .opts.texts, .opts.n12.names, .opts.n12.civs { grid-template-columns: 1fr; max-width: 360px; }
+    .opts.shields { grid-template-columns: 1fr 1fr; max-width: 340px; }
+    .opts.n12.shields, .opts.units { grid-template-columns: repeat(3, 1fr); }
+    .big { width: 160px; height: 160px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track { animation: none; }
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main id="app"></main>
+
+<script src="civs.js"></script>
+<script>
+const CIVS = window.CIVS || [];
+const app = document.getElementById('app');
+
+const store = {
+  get(key, fallback) {
+    try { const v = localStorage.getItem('escudos.' + key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem('escudos.' + key, JSON.stringify(value)); } catch {}
+  },
+};
+
+const settings = { len: 20, lang: 'en', chronicles: false, level: 'facil', ...store.get('settings', {}) };
+const stats = store.get('stats', {});   // { clave: [aciertos, fallos] }
+let best = store.get('best', 0);        // mejor racha de siempre
+let screen = 'menu';
+let game = null;
+let hideNames = false;
+
+const LEVELS = {
+  facil: { label: 'Fácil', n: 4, size: 'n4', info: '4 opciones' },
+  media: { label: 'Media', n: 8, size: 'n8', info: '8 opciones' },
+  dificil: { label: 'Difícil', n: 12, size: 'n12', info: '12 opciones, con todas las de su misma expansión' },
+  experto: { label: 'Experto', n: 0, size: 'nall', info: 'Todas las opciones posibles' },
+};
+const AGES = { 1: 'Edad Oscura', 2: 'Edad Feudal', 3: 'Edad de los Castillos', 4: 'Edad Imperial' };
+
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+const tr = o => o[settings.lang];       // texto en el idioma elegido
+const src = c => `escudos/${c.id}.png`;
+const unitSrc = u => `unidades/${u.id}.png`;
+const ageImg = t => t.edad ? `<img src="iconos/edad-${t.edad}.png" alt="" title="${AGES[t.edad]}">` : '';
+const inPool = c => settings.chronicles || !c.chronicles;
+const pool = () => CIVS.filter(inPool);
+const byName = (a, b) => tr(a).localeCompare(tr(b), settings.lang);
+const shuffle = a => {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+};
+const sample = (a, n) => shuffle(a.slice()).slice(0, n);
+
+// Unidades y tecnologías únicas con sus civs (alguna se comparte: el húsar alado es de polacos y lituanos)
+function collect(field) {
+  const all = {};
+  CIVS.forEach(c => (c[field] || []).forEach(x => (all[x.id] ||= { ...x, civs: [] }).civs.push(c)));
+  return Object.values(all);
+}
+const UNITS = collect('units');
+const TECHS = collect('techs');
+
+// Qué se pregunta en cada modo y con qué clave se guardan sus aciertos y fallos
+const MODES = {
+  shield: { items: pool, key: c => c.id },
+  name: { items: pool, key: c => c.id },
+  mix: { items: pool, key: c => c.id },
+  spec: { items: pool, key: c => 'esp:' + c.id },
+  unit: { items: () => UNITS.filter(u => u.civs.some(inPool)), key: u => 'uu:' + u.id },
+  units: { items: pool, key: c => 'uuc:' + c.id },
+  tech: { items: () => TECHS.filter(t => t.civs.some(inPool)), key: t => 'ut:' + t.id },
+};
+
+// Precarga, para que los escudos aparezcan al instante
+CIVS.forEach(c => { new Image().src = src(c); });
+
+// Más peso a lo que fallas o aún no has visto
+function weight(mode, item) {
+  const [ok, ko] = stats[MODES[mode].key(item)] || [0, 0];
+  return Math.min(4, Math.max(.25, (ko + 1) / (ok + 1)));
+}
+
+function pickRound(mode) {
+  const all = MODES[mode].items();
+  const n = settings.len || all.length;
+  if (n >= all.length) return shuffle(all);
+  return shuffle(all
+    .map(it => [Math.random() ** (1 / weight(mode, it)), it])
+    .sort((a, b) => b[0] - a[0])
+    .slice(0, n)
+    .map(([, it]) => it));
+}
+
+// Sin lista de preguntas = modo infinito
+const newRound = mode => settings.len === 'inf' ? null : pickRound(mode);
+
+// Modo infinito: lo que fallas vuelve a los pocos turnos; si no, algo que no haya salido hace poco
+function drawNext() {
+  const due = game.again.findIndex(a => a.at <= game.i);
+  if (due >= 0) return game.again.splice(due, 1)[0].item;
+  const all = MODES[game.mode].items();
+  const recent = game.queue.slice(-Math.min(10, Math.floor(all.length / 2)));
+  const candidates = all.filter(it => !recent.includes(it));
+  const weights = candidates.map(it => weight(game.mode, it));
+  let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+  return candidates.find((_, i) => (r -= weights[i]) < 0) || candidates[candidates.length - 1];
+}
+
+/* ---------- Menú ---------- */
+
+const decor = shuffle(CIVS.slice()).map(c => `<img src="${src(c)}" alt="">`).join('');
+const regular = CIVS.filter(c => !c.chronicles);
+const [d1, d2, d3, d4, d5] = sample(regular, 5);
+const specExample = sample(regular.filter(c => c.spec?.tags.length === 1), 1)[0];
+const unitExample = sample(UNITS.filter(u => !u.civs[0].chronicles), 1)[0];
+const unitsExample = sample(regular.filter(c => c.units?.length === 2), 1)[0];
+const chronicleCount = CIVS.filter(c => c.chronicles).length;
+
+function seg(key, options) {
+  return `<div class="seg">${options.map(([value, label]) =>
+    `<button class="${settings[key] === value ? 'on' : ''}" data-act="set" data-key="${key}" data-val='${JSON.stringify(value)}'>${label}</button>`
+  ).join('')}</div>`;
+}
+
+const card = (mode, pics, title, desc) => `
+  <button class="btn mode" data-act="play" data-mode="${mode}">
+    <span class="pics">${pics}</span>
+    <strong>${title}</strong>
+    <small>${desc}</small>
+  </button>`;
+
+const infoText = () => LEVELS[settings.level].info +
+  (settings.len === 'inf' ? ' · Infinito: lo que falles vuelve a salir' : '');
+
+function showMenu() {
+  if (game) clearTimeout(game.timer);
+  game = null;
+  screen = 'menu';
+  app.innerHTML = `
+    <div class="marquee" aria-hidden="true"><div class="track">${decor}${decor}</div></div>
+    <section class="screen menu">
+      <p class="kicker">Un quiz de fans de Age of Empires II</p>
+      <h1>Civilizaciones</h1>
+      <p class="sub">¿Cuánto sabes de cada civ?</p>
+      <div class="settings">
+        <span>Preguntas</span>${seg('len', [[10, '10'], [20, '20'], [0, 'Todas'], ['inf', '∞']])}
+        <span>Dificultad</span>${seg('level', Object.entries(LEVELS).map(([key, l]) => [key, l.label]))}
+        <span>Nombres</span>${seg('lang', [['en', 'English'], ['es', 'Español']])}
+        ${chronicleCount ? `<span>Chronicles</span>${seg('chronicles', [[false, 'No'], [true, `Sí · +${chronicleCount}`]])}` : ''}
+      </div>
+      <p class="level-info">${infoText()}</p>
+      <h2 class="section">Escudos</h2>
+      <div class="modes">
+        ${card('shield', `<img src="${src(d1)}" alt=""><span class="arrow">→</span><span class="aa">Aa</span>`,
+          'Escudo → Nombre', 'Ves un escudo y eliges la civilización')}
+        ${card('name', `<span class="aa">Aa</span><span class="arrow">→</span><img src="${src(d2)}" alt="">`,
+          'Nombre → Escudo', 'Ves una civilización y eliges su escudo')}
+        ${card('mix', `<img src="${src(d3)}" alt=""><span class="arrow">⇄</span><img src="${src(d4)}" alt="">`,
+          'Mezcla', 'Un poco de cada')}
+      </div>
+      <h2 class="section">Conoce las civs</h2>
+      <div class="modes four">
+        ${card('spec', `<img src="${src(specExample)}" alt=""><span class="arrow">→</span><span class="ex" id="spec-example">${esc(tr(specExample.spec))}</span>`,
+          'Especialidad', 'En qué destaca cada civ · siempre 4 opciones')}
+        ${card('unit', `<img class="uu" src="${unitSrc(unitExample)}" alt=""><span class="arrow">→</span><img src="${src(unitExample.civs[0])}" alt="">`,
+          'Unidad → Civ', 'Ves una unidad única y eliges su civ')}
+        ${card('units', `<img class="sm" src="${src(unitsExample)}" alt=""><span class="arrow">→</span>${unitsExample.units.map(u => `<img class="uu sm" src="${unitSrc(u)}" alt="">`).join('')}`,
+          'Civ → Unidades', 'Ves una civ y eliges su unidad o unidades únicas')}
+        ${card('tech', `<img src="iconos/edad-4.png" alt=""><span class="arrow">→</span><img src="${src(d5)}" alt="">`,
+          'Tecnología única', 'Ves qué hace y eliges su civ')}
+      </div>
+      <button class="btn ghost" data-act="study">Estudiar las civilizaciones</button>
+      ${best ? `<p class="muted">Mejor racha: ${best}</p>` : ''}
+      <p class="legal">Age of Empires II: Definitive Edition © Microsoft Corporation. Civilizaciones was created under Microsoft's
+        "<a href="https://www.xbox.com/en-US/developers/rules" target="_blank" rel="noopener">Game Content Usage Rules</a>"
+        using assets from Age of Empires II: Definitive Edition, and it is not endorsed by or affiliated with Microsoft.</p>
+    </section>`;
+}
+
+/* ---------- Partida ---------- */
+
+function startGame(mode, queue) {
+  const infinite = !queue;
+  game = { mode, infinite, queue: queue || [], again: [], i: 0, done: 0, correct: 0, streak: 0, runBest: 0, bestBefore: best, misses: [], timer: 0 };
+  screen = 'game';
+  app.innerHTML = `
+    <section class="screen game">
+      <header class="hud ${infinite ? 'inf' : ''}">
+        ${infinite
+          ? '<button class="btn ghost small" data-act="finish" title="Terminar y ver el resultado (Esc)">Terminar</button>'
+          : '<button class="btn ghost small" data-act="menu" title="Volver al menú (Esc)">✕</button>'}
+        <div class="bar"><i></i></div>
+        <span class="count"></span>
+        <span class="pill hits" title="Aciertos"></span>
+        <span class="pill streak" title="Racha"></span>
+      </header>
+      <div class="stage"></div>
+    </section>`;
+  ask();
+}
+
+function updateHud() {
+  const { i, queue, correct, streak, answered, infinite } = game;
+  if (!infinite) app.querySelector('.bar i').style.width = `${100 * (i + (answered ? 1 : 0)) / queue.length}%`;
+  app.querySelector('.count').textContent = `${i + 1} / ${infinite ? '∞' : queue.length}`;
+  app.querySelector('.hits').textContent = `✓ ${correct}`;
+  const pill = app.querySelector('.streak');
+  pill.textContent = `🔥 ${streak}`;
+  pill.classList.toggle('hot', streak >= 5);
+}
+
+// Civs entre las que elegir según la dificultad; answers son las que valen como respuesta
+function civChoices(answers) {
+  const [civ] = answers;
+  const { n } = LEVELS[settings.level];
+  if (!n) return pool();
+  const others = pool().filter(c => !answers.includes(c));
+  let rest;
+  if (settings.level === 'dificil') {
+    const same = sample(others.filter(c => c.exp.en === civ.exp.en), n - 1);
+    rest = [...same, ...sample(others.filter(c => c.exp.en !== civ.exp.en), n - 1 - same.length)];
+  } else {
+    rest = sample(others, n - 1);
+  }
+  return [civ, ...rest];
+}
+
+// Unidades entre las que elegir: todas las de la civ y, según la dificultad, otras tantas como en el resto de modos
+function unitChoices(civ) {
+  const own = UNITS.filter(u => u.civs.includes(civ));
+  const others = UNITS.filter(u => !own.includes(u) && u.civs.some(inPool));
+  const { n } = LEVELS[settings.level];
+  let rest = others;
+  if (settings.level === 'dificil') {
+    const sameExp = u => u.civs.some(c => c.exp.en === civ.exp.en);
+    const same = sample(others.filter(sameExp), n - 1);
+    rest = [...same, ...sample(others.filter(u => !sameExp(u)), n - 1 - same.length)];
+  } else if (n) {
+    rest = sample(others, n - 1);
+  }
+  return { own, choices: shuffle([...own, ...rest]) };
+}
+
+const HEADS = {
+  shield: c => `
+    <p class="prompt">¿De qué civilización es este escudo?</p>
+    <img class="big" src="${src(c)}" alt="">`,
+  name: c => `
+    <p class="prompt">¿Cuál es el escudo de…</p>
+    <h2 class="title">${esc(tr(c))}</h2>`,
+  spec: c => `
+    <p class="prompt">¿En qué destaca esta civilización?</p>
+    <img class="mid" src="${src(c)}" alt="">
+    <h2 class="title small">${esc(tr(c))}</h2>`,
+  unit: u => `
+    <p class="prompt">¿De qué civilización es esta unidad única?</p>
+    <img class="unit-img" src="${unitSrc(u)}" alt="">
+    <h2 class="title small">${esc(tr(u))}</h2>`,
+  units: (c, need) => `
+    <p class="prompt">${need > 1 ? `¿Cuáles son las ${need} unidades únicas de…` : '¿Cuál es la unidad única de…'}</p>
+    <img class="mid" src="${src(c)}" alt="">
+    <h2 class="title small">${esc(tr(c))}</h2>`,
+  tech: t => `
+    <p class="prompt">¿De qué civilización es esta tecnología única?</p>
+    <div class="techline">${ageImg(t)}<h2 class="title small">${esc(tr(t))}</h2></div>
+    ${t.edad ? `<p class="age-tag">${AGES[t.edad]}</p>` : ''}
+    <p class="fx">${esc(tr(t.fx))}</p>`,
+};
+
+function makeQuestion(item) {
+  const kind = game.mode === 'mix' ? (Math.random() < .5 ? 'shield' : 'name') : game.mode;
+  const { size } = LEVELS[settings.level];
+
+  if (kind === 'spec') {
+    // Solo especialidades sin nada en común con la buena, para que no haya dudas
+    const unrelated = new Map();
+    pool().forEach(c => {
+      if (!c.spec.tags.some(t => item.spec.tags.includes(t))) unrelated.set(c.spec.tags.join(), c);
+    });
+    const civs = shuffle([item, ...sample([...unrelated.values()], 3)]);
+    return { kind, style: 'texts', size: 'n4', head: HEADS.spec(item), opts: civs.map(c => ({ text: tr(c.spec), ok: c === item })) };
+  }
+
+  if (kind === 'units') {
+    const { own, choices } = unitChoices(item);
+    return { kind, style: 'units', size, need: own.length, head: HEADS.units(item, own.length), opts: choices.map(u => ({ unit: u, ok: own.includes(u) })) };
+  }
+
+  const answers = kind === 'unit' || kind === 'tech' ? shuffle(item.civs.filter(inPool)) : [item];
+  const style = { shield: 'names', name: 'shields' }[kind] || 'civs';
+  const civs = civChoices(answers);
+  // Los nombres, por orden alfabético cuando hay muchos; los escudos sueltos, siempre al azar
+  if (style === 'shields' || civs.length <= 4) shuffle(civs);
+  else civs.sort(byName);
+  return { kind, style, size, head: HEADS[kind](item), opts: civs.map(c => ({ civ: c, ok: answers.includes(c) })) };
+}
+
+function option(o, i, style, withKeys) {
+  const inner =
+    style === 'texts' ? `<span>${esc(o.text)}</span>` :
+    style === 'units' ? `<img src="${unitSrc(o.unit)}" alt="" title="${esc(tr(o.unit))}"><span class="lbl">${esc(tr(o.unit))}</span>` :
+    style === 'shields' ? `<img src="${src(o.civ)}" alt=""><span class="lbl">${esc(tr(o.civ))}</span>` :
+    `<img class="mini" src="${src(o.civ)}" alt=""><span>${esc(tr(o.civ))}</span>`;
+  return `<button class="btn opt" data-act="answer" data-i="${i}">${inner}${withKeys ? `<kbd>${i + 1}</kbd>` : ''}</button>`;
+}
+
+function ask() {
+  if (game.infinite && game.i >= game.queue.length) game.queue.push(drawNext());
+  const item = game.queue[game.i];
+  const q = game.q = { item, need: 1, got: 0, ...makeQuestion(item) };
+  const n = q.opts.length;
+  game.answered = false;
+
+  const section = app.querySelector('.game');
+  section.classList.remove('waiting');
+  section.classList.toggle('wide', q.size === 'nall');
+  const stage = app.querySelector('.stage');
+  stage.className = `stage ${q.size}`;
+  // Las unidades en una fila (Fácil) o en dos
+  const cols = q.style === 'units' && q.size !== 'nall' ? ` style="--cols: ${q.size === 'n4' ? n : Math.ceil(n / 2)}"` : '';
+  stage.innerHTML = `
+    <div class="ask">${q.head}</div>
+    <div class="opts ${q.style} ${q.size}"${cols}>${q.opts.map((o, i) => option(o, i, q.style, n <= 9)).join('')}</div>
+    <p class="hint">Haz clic en cualquier sitio para seguir</p>`;
+  updateHud();
+}
+
+function answer(i) {
+  const q = game.q;
+  const o = q.opts[i];
+  if (o.picked) return;
+  o.picked = true;
+  const buttons = app.querySelectorAll('.stage .opt');
+  // Si hay que elegir varias (las unidades de una civ), cada acierto se queda marcado y se sigue eligiendo
+  if (o.ok && ++q.got < q.need) {
+    buttons[i].classList.add('ok');
+    return;
+  }
+
+  const ok = o.ok;
+  game.answered = true;
+  game.answeredAt = performance.now();
+  game.done++;
+  (stats[MODES[game.mode].key(q.item)] ||= [0, 0])[ok ? 0 : 1]++;
+  store.set('stats', stats);
+  if (ok) {
+    game.correct++;
+    game.streak++;
+    game.runBest = Math.max(game.runBest, game.streak);
+    if (game.streak > best) store.set('best', best = game.streak);
+  } else {
+    game.streak = 0;
+    if (!game.misses.includes(q.item)) game.misses.push(q.item);
+    if (game.infinite) game.again.push({ item: q.item, at: game.i + 3 + (Math.random() * 3 | 0) });
+  }
+
+  const stage = app.querySelector('.stage');
+  stage.classList.add('answered', ok ? 'was-ok' : 'was-ko');
+  buttons.forEach((b, j) => b.classList.add(q.opts[j].ok ? 'ok' : j === i ? 'ko' : 'dim'));
+  document.activeElement?.blur();
+  updateHud();
+
+  // Si aciertas pasa sola; si fallas espera a que mires la respuesta
+  if (ok) game.timer = setTimeout(next, 750);
+  else app.querySelector('.game').classList.add('waiting');
+}
+
+function next() {
+  clearTimeout(game.timer);
+  game.i++;
+  if (!game.infinite && game.i >= game.queue.length) showEnd();
+  else ask();
+}
+
+function finish() {
+  clearTimeout(game.timer);
+  if (game.done) showEnd();
+  else showMenu();
+}
+
+/* ---------- Resultado ---------- */
+
+function missHtml(item) {
+  const fact = (img, title, sub, extra = '', cls = '') => `
+    <div class="fact ${cls}">
+      <img src="${img}" alt="">
+      <div><b>${esc(title)}</b><small>${esc(sub)}</small>${extra ? `<small class="fx-line">${esc(extra)}</small>` : ''}</div>
+    </div>`;
+  const owners = it => it.civs.filter(inPool);
+  switch (game.mode) {
+    case 'spec': return fact(src(item), tr(item), tr(item.spec));
+    case 'unit': return fact(unitSrc(item), tr(item), owners(item).map(tr).join(' / '), '', 'unit');
+    case 'units': return fact(src(item), tr(item), item.units.map(tr).join(' · '));
+    case 'tech': return fact(src(owners(item)[0]), tr(item), owners(item).map(tr).join(' / '), tr(item.fx));
+    default: return `<div class="chip"><img src="${src(item)}" alt=""><span>${esc(tr(item))}</span></div>`;
+  }
+}
+
+function showEnd() {
+  screen = 'end';
+  const { done, correct, misses, runBest, bestBefore, mode, infinite } = game;
+  const pct = Math.round(100 * correct / done);
+  const [age, msg] =
+    pct === 100 ? ['¡Impecable!', 'Ni un monje podría convertirte.'] :
+    pct >= 80 ? ['Edad Imperial', 'Casi de torneo. ¡Muy bien!'] :
+    pct >= 55 ? ['Edad de los Castillos', 'Vas bien, pero aún queda.'] :
+    pct >= 30 ? ['Edad Feudal', 'Toca repasar un poco.'] :
+                ['Edad Oscura', 'Wololo… ¡a estudiar!'];
+  const isFact = ['spec', 'unit', 'units', 'tech'].includes(mode);
+  app.innerHTML = `
+    <section class="screen end">
+      <p class="muted">${infinite ? 'Modo infinito' : 'Resultado'}</p>
+      <div class="score">${correct}<small> / ${done}</small></div>
+      <h2 class="age">${age}</h2>
+      <p>${msg}</p>
+      <p class="muted">${pct}% de aciertos · mejor racha: ${runBest}</p>
+      ${runBest > bestBefore ? '<p class="record">🔥 ¡Nuevo récord de racha!</p>' : ''}
+      ${misses.length ? `
+        <h3 class="misses-title">${misses.length === 1 ? 'Has fallado esta' : `Has fallado estas ${misses.length}`}</h3>
+        <div class="${isFact ? 'facts' : 'chips'}">${misses.map(missHtml).join('')}</div>` : ''}
+      <div class="actions">
+        ${misses.length ? '<button class="btn primary" data-act="retry">Repasar fallos</button>' : ''}
+        <button class="btn ${misses.length ? '' : 'primary'}" data-act="again">Otra ronda</button>
+        <button class="btn ghost" data-act="menu">Menú</button>
+      </div>
+    </section>`;
+}
+
+/* ---------- Estudiar ---------- */
+
+function showStudy() {
+  screen = 'study';
+  const list = pool().sort(byName);
+  app.innerHTML = `
+    <section class="screen study ${hideNames ? 'hide-names' : ''}">
+      <header class="hud">
+        <button class="btn ghost small" data-act="menu">← Menú</button>
+        <h2>Estudiar</h2>
+        <button class="btn small" data-act="hide">${hideNames ? 'Mostrar nombres' : 'Ocultar nombres'}</button>
+      </header>
+      <p class="muted">${hideNames ? 'Intenta adivinarlo y haz clic en un escudo para ver su nombre.' : 'Haz clic en una civilización para ver su ficha.'}</p>
+      <div class="chips">${list.map(c =>
+        `<button class="chip" data-act="${hideNames ? 'flip' : 'sheet'}" data-id="${c.id}"><img src="${src(c)}" alt=""><span>${esc(tr(c))}</span></button>`
+      ).join('')}</div>
+    </section>`;
+}
+
+function showSheet(id) {
+  const c = CIVS.find(x => x.id === id);
+  app.insertAdjacentHTML('beforeend', `
+    <div class="modal" data-act="close">
+      <article class="sheet" data-act="noop">
+        <button class="btn ghost small close" data-act="close" title="Cerrar (Esc)">✕</button>
+        <header>
+          <img src="${src(c)}" alt="">
+          <div><h2>${esc(tr(c))}</h2><p class="muted">${esc(tr(c.exp))}</p></div>
+        </header>
+        <h3>Especialidad</h3>
+        <p class="spec">${esc(tr(c.spec))}</p>
+        <h3>${c.units.length > 1 ? 'Unidades únicas' : 'Unidad única'}</h3>
+        <div class="uu-list">${c.units.map(u =>
+          `<figure><img src="${unitSrc(u)}" alt=""><figcaption>${esc(tr(u))}</figcaption></figure>`).join('')}</div>
+        <h3>Tecnologías únicas</h3>
+        <ul class="techs">${c.techs.map(t =>
+          `<li>${ageImg(t)}<div><b>${esc(tr(t))}</b><span>${esc(tr(t.fx))}</span></div></li>`).join('')}</ul>
+      </article>
+    </div>`);
+}
+
+const closeSheet = () => app.querySelector('.modal')?.remove();
+
+/* ---------- Controles ---------- */
+
+const actions = {
+  set(b) {
+    const key = b.dataset.key;
+    settings[key] = JSON.parse(b.dataset.val);
+    store.set('settings', settings);
+    b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    app.querySelector('.level-info').textContent = infoText();
+    if (key === 'lang') document.getElementById('spec-example').textContent = tr(specExample.spec);
+  },
+  play: b => startGame(b.dataset.mode, newRound(b.dataset.mode)),
+  answer: b => answer(Number(b.dataset.i)),
+  again: () => startGame(game.mode, newRound(game.mode)),
+  retry: () => startGame(game.mode, shuffle(game.misses.slice())),
+  finish,
+  study: showStudy,
+  menu: showMenu,
+  hide() { hideNames = !hideNames; showStudy(); },
+  flip: b => b.classList.contains('show') ? showSheet(b.dataset.id) : b.classList.add('show'),
+  sheet: b => showSheet(b.dataset.id),
+  close: closeSheet,
+  noop() {},
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  const act = b?.dataset.act;
+  // Ya respondida: cualquier clic pasa a la siguiente (con un margen para no saltarla sin querer)
+  if (screen === 'game' && game.answered && act !== 'menu' && act !== 'finish') {
+    if (performance.now() - game.answeredAt > 250) next();
+    return;
+  }
+  if (b) actions[act](b);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && app.querySelector('.modal')) return closeSheet();
+  if (screen !== 'game' || e.repeat) return;
+  if (e.key === 'Escape') return game.infinite ? finish() : showMenu();
+  if (game.answered) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (performance.now() - game.answeredAt > 250) next();
+    }
+    return;
+  }
+  const n = Number(e.key);
+  const count = game.q.opts.length;
+  if (count <= 9 && n >= 1 && n <= count) answer(n - 1);
+});
+
+if (CIVS[0]?.techs) showMenu();
+else app.innerHTML = '<section class="screen"><h1>Faltan los datos</h1><p class="muted">Ejecuta <code>python3 extraer.py</code> en esta carpeta.</p></section>';
+</script>
+</body>
+</html>
