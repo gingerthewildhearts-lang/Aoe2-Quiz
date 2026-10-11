@@ -130,23 +130,31 @@
   .game { min-height: 100vh; }
   .game.wide { max-width: 1180px; }
   .game.waiting { cursor: pointer; }
-  .hud { width: 100%; display: flex; align-items: center; gap: 12px; }
-  .bar { flex: 1; height: 8px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, .08); }
-  .bar i { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #b8893a, var(--gold-hi)); transition: width .35s ease; }
-  .hud.inf .bar { visibility: hidden; }
-  .count { min-width: 4.5em; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .pill {
-    padding: .2em .75em;
-    border: 1px solid var(--line);
-    border-radius: 99px;
-    background: rgba(0, 0, 0, .35);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    transition: color .2s, border-color .2s;
-  }
-  .pill.hits { color: var(--ok); }
-  .pill.hot { color: var(--gold-hi); border-color: var(--gold); }
+  .hud { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+  .progress { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 10px; }
+  .strip { flex: 1; height: 16px; display: flex; gap: 3px; padding: 3px; background: rgba(0, 0, 0, .45); border: 1px solid var(--line); border-radius: 99px; }
+  .strip.dense { gap: 1px; }
+  .strip span { flex: 1; border-radius: 99px; background: rgba(255, 255, 255, .08); transition: background .3s; }
+  .strip.dense span { border-radius: 1px; }
+  .strip .ok { background: var(--ok); }
+  .strip .ko { background: var(--ko); }
+  .strip .now { background: var(--gold); animation: glow 1s ease-in-out infinite alternate; }
+  .count { font-family: var(--display); font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .count b { font-size: 1.15rem; color: var(--text); }
+  .stats { display: flex; gap: 16px; }
+  .stat { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 6px; }
+  .stat svg { grid-row: span 2; width: 26px; height: 26px; }
+  .stat b { font-family: var(--display); font-size: 1.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat small { font-size: .68rem; line-height: 1.2; color: var(--muted); }
+  .stat.hits svg { color: var(--ok); }
+  .stat.misses svg { color: var(--ko); }
+  .stat.streak svg { transition: filter .3s, opacity .3s; }
+  .stat.streak.cold svg { filter: grayscale(1); opacity: .45; }
+  .stat.streak.hot svg { filter: drop-shadow(0 0 6px rgba(255, 160, 50, .85)); animation: flicker .5s ease-in-out infinite alternate; }
+  .stat.streak.blaze svg { filter: drop-shadow(0 0 10px rgba(255, 140, 30, 1)); animation-name: blaze; }
+  .bump { animation: bump .35s cubic-bezier(.2, .9, .3, 1.4); }
+  .drop { animation: shake .35s; }
+  .seg.sizes button { padding: .15em .6em; font-family: var(--display); font-weight: 700; line-height: 1.5; }
 
   .stage { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding-bottom: 5vh; }
   .stage.nall { gap: 16px; }
@@ -167,7 +175,7 @@
   .age-tag { margin-top: -6px; font-size: .9rem; color: var(--muted); }
   .fx { max-width: 600px; padding: 10px 18px; font-size: 1.1rem; text-align: center; background: rgba(0, 0, 0, .3); border: 1px solid var(--line); border-radius: 10px; }
 
-  .opts { display: grid; gap: 12px; width: 100%; }
+  .opts { display: grid; gap: 12px; width: 100%; zoom: var(--zoom, 1); }
   .opts.names, .opts.civs, .opts.texts { grid-template-columns: 1fr 1fr; max-width: 640px; }
   .opts.n12.names, .opts.n12.civs { grid-template-columns: repeat(3, 1fr); max-width: 840px; }
   .opts.shields { grid-template-columns: repeat(4, 1fr); max-width: 700px; }
@@ -246,10 +254,12 @@
 
   /* Resultado */
   .end { padding-top: 6vh; gap: 14px; }
+  .end .strip { flex: none; width: min(100%, 560px); }
   .score { font-family: var(--display); font-weight: 700; font-size: clamp(3.4rem, 13vw, 6rem); line-height: 1; color: var(--gold); text-shadow: 0 4px 0 #000; }
   .score small { font-size: .45em; color: var(--muted); }
   .age { font-size: 1.6rem; }
   .record { color: var(--gold-hi); font-weight: 600; }
+  .record svg { width: 20px; height: 20px; vertical-align: -4px; }
   .misses-title { margin-top: 12px; font-size: 1.05rem; color: var(--muted); }
   .chips, .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
   .chip { width: 124px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 10px; background: rgba(0, 0, 0, .28); border: 1px solid var(--line); border-radius: 10px; }
@@ -304,6 +314,10 @@
   @keyframes pop { from { opacity: 0; transform: scale(.85); } }
   @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
   @keyframes scroll { to { transform: translateX(-50%); } }
+  @keyframes glow { from { box-shadow: 0 0 2px rgba(226, 187, 98, .3); } to { box-shadow: 0 0 10px rgba(226, 187, 98, .9); } }
+  @keyframes flicker { to { transform: scale(1.08) rotate(-3deg); } }
+  @keyframes blaze { from { transform: scale(1.15); } to { transform: scale(1.3) rotate(-4deg); } }
+  @keyframes bump { 40% { transform: scale(1.3); } }
 
   @media (max-width: 860px) {
     .settings { grid-template-columns: auto auto; }
@@ -339,7 +353,7 @@ const store = {
   },
 };
 
-const settings = { len: 20, lang: 'en', chronicles: false, level: 'facil', ...store.get('settings', {}) };
+const settings = { len: 20, lang: 'en', chronicles: false, level: 'facil', zoom: 1, ...store.get('settings', {}) };
 const stats = store.get('stats', {});   // { clave: [aciertos, fallos] }
 let best = store.get('best', 0);        // mejor racha de siempre
 let screen = 'menu';
@@ -353,6 +367,12 @@ const LEVELS = {
   experto: { label: 'Experto', n: 0, size: 'nall', info: 'Todas las opciones posibles' },
 };
 const AGES = { 1: 'Edad Oscura', 2: 'Edad Feudal', 3: 'Edad de los Castillos', 4: 'Edad Imperial' };
+const SIZES = [1, 1.2, 1.4];   // tamaño de las opciones
+const ICONS = {
+  ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 12.4l3.2 3.2 6.4-6.6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  ko: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/><path d="M8.3 8.3l7.4 7.4M15.7 8.3l-7.4 7.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  flame: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.8c2.6 3.9 7.2 6.6 7.2 12.4 0 4.3-3.2 7.9-7.2 7.9s-7.2-3.6-7.2-7.9c0-3.1 1.6-5.4 3.4-7.1 0 2.4 1.2 3.9 2.8 3.9.3-3.4-.6-6 1-9.2z" fill="#f2862f"/><path d="M12 11.6c1.5 1.7 3.4 3.1 3.4 5.4 0 2-1.5 3.6-3.4 3.6s-3.4-1.6-3.4-3.6c0-1.8 1.6-3.4 3.4-5.4z" fill="#ffd45c"/></svg>',
+};
 
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const tr = o => o[settings.lang];       // texto en el idioma elegido
@@ -498,33 +518,73 @@ function showMenu() {
 
 function startGame(mode, queue) {
   const infinite = !queue;
-  game = { mode, infinite, queue: queue || [], again: [], i: 0, done: 0, correct: 0, streak: 0, runBest: 0, bestBefore: best, misses: [], timer: 0 };
+  game = { mode, infinite, queue: queue || [], again: [], results: [], i: 0, done: 0, correct: 0, streak: 0, runBest: 0, bestBefore: best, misses: [], timer: 0 };
   screen = 'game';
   app.innerHTML = `
-    <section class="screen game">
-      <header class="hud ${infinite ? 'inf' : ''}">
+    <section class="screen game" style="--zoom: ${settings.zoom}">
+      <header class="hud">
         ${infinite
           ? '<button class="btn ghost small" data-act="finish" title="Terminar y ver el resultado (Esc)">Terminar</button>'
           : '<button class="btn ghost small" data-act="menu" title="Volver al menú (Esc)">✕</button>'}
-        <div class="bar"><i></i></div>
-        <span class="count"></span>
-        <span class="pill hits" title="Aciertos"></span>
-        <span class="pill streak" title="Racha"></span>
+        <div class="progress"></div>
+        <div class="stats">
+          <div class="stat hits" title="Aciertos">${ICONS.ok}<b>0</b><small>aciertos</small></div>
+          <div class="stat misses" title="Fallos">${ICONS.ko}<b>0</b><small>fallos</small></div>
+          <div class="stat streak cold" title="Racha: aciertos seguidos">${ICONS.flame}<b>0</b><small>racha</small></div>
+        </div>
+        <div class="seg sizes" title="Tamaño de las opciones (teclas + y −)">${SIZES.map((z, k) =>
+          `<button class="${settings.zoom === z ? 'on' : ''}" data-act="size" data-zoom="${z}" style="font-size: ${.75 + k * .22}rem">A</button>`).join('')}</div>
       </header>
       <div class="stage"></div>
     </section>`;
   ask();
 }
 
-function updateHud() {
-  const { i, queue, correct, streak, answered, infinite } = game;
-  if (!infinite) app.querySelector('.bar i').style.width = `${100 * (i + (answered ? 1 : 0)) / queue.length}%`;
-  app.querySelector('.count').textContent = `${i + 1} / ${infinite ? '∞' : queue.length}`;
-  app.querySelector('.hits').textContent = `✓ ${correct}`;
-  const pill = app.querySelector('.streak');
-  pill.textContent = `🔥 ${streak}`;
-  pill.classList.toggle('hot', streak >= 5);
+// Barra de progreso: un tramo por pregunta, verde o rojo según la respuesta y dorado el actual
+function stripHtml(results, from, to, current) {
+  let html = '';
+  for (let k = from; k < to; k++) {
+    html += `<span class="${results[k] === true ? 'ok' : results[k] === false ? 'ko' : k === current ? 'now' : ''}"></span>`;
+  }
+  return `<div class="strip${to - from > 40 ? ' dense' : ''}">${html}</div>`;
 }
+
+function updateHud() {
+  const { i, queue, results, correct, done, streak, infinite } = game;
+  // En el modo infinito, la barra muestra las últimas 20
+  const from = infinite ? Math.max(0, i - 19) : 0;
+  const to = infinite ? from + 20 : queue.length;
+  app.querySelector('.progress').innerHTML = stripHtml(results, from, to, i) +
+    `<span class="count"><b>${i + 1}</b> / ${infinite ? '∞' : queue.length}</span>`;
+  setStat('hits', correct);
+  setStat('misses', done - correct);
+  setStat('streak', streak);
+  const flame = app.querySelector('.stat.streak');
+  flame.classList.toggle('cold', !streak);
+  flame.classList.toggle('hot', streak >= 5);
+  flame.classList.toggle('blaze', streak >= 10);
+}
+
+// Cambia un contador con un saltito (o una sacudida si baja, como la racha al fallar)
+function setStat(name, value) {
+  const stat = app.querySelector(`.stat.${name}`);
+  const b = stat.querySelector('b');
+  const old = Number(b.textContent);
+  if (old === value) return;
+  b.textContent = value;
+  stat.classList.remove('bump', 'drop');
+  void stat.offsetWidth;   // para que la animación vuelva a empezar
+  stat.classList.add(value > old ? 'bump' : 'drop');
+}
+
+// Tamaño de las opciones; se guarda para la próxima vez
+function setSize(zoom) {
+  settings.zoom = zoom;
+  store.set('settings', settings);
+  app.querySelector('.game')?.style.setProperty('--zoom', zoom);
+  app.querySelectorAll('.sizes button').forEach(b => b.classList.toggle('on', Number(b.dataset.zoom) === zoom));
+}
+const changeSize = step => setSize(SIZES[Math.min(SIZES.length - 1, Math.max(0, SIZES.indexOf(settings.zoom) + step))]);
 
 // Civs entre las que elegir según la dificultad; answers son las que valen como respuesta
 function civChoices(answers) {
@@ -658,6 +718,7 @@ function answer(i) {
   game.answered = true;
   game.answeredAt = performance.now();
   game.done++;
+  game.results[game.i] = ok;
   (stats[MODES[game.mode].key(q.item)] ||= [0, 0])[ok ? 0 : 1]++;
   store.set('stats', stats);
   if (ok) {
@@ -731,7 +792,8 @@ function showEnd() {
       <h2 class="age">${age}</h2>
       <p>${msg}</p>
       <p class="muted">${pct}% de aciertos · mejor racha: ${runBest}</p>
-      ${runBest > bestBefore ? '<p class="record">🔥 ¡Nuevo récord de racha!</p>' : ''}
+      ${stripHtml(game.results, 0, game.results.length, -1)}
+      ${runBest > bestBefore ? `<p class="record">${ICONS.flame} ¡Nuevo récord de racha!</p>` : ''}
       ${misses.length ? `
         <h3 class="misses-title">${misses.length === 1 ? 'Has fallado esta' : `Has fallado estas ${misses.length}`}</h3>
         <div class="${isFact ? 'facts' : 'chips'}">${misses.map(missHtml).join('')}</div>` : ''}
@@ -802,6 +864,7 @@ const actions = {
   again: () => startGame(game.mode, newRound(game.mode)),
   retry: () => startGame(game.mode, shuffle(game.misses.slice())),
   finish,
+  size: b => setSize(Number(b.dataset.zoom)),
   study: showStudy,
   menu: showMenu,
   hide() { hideNames = !hideNames; showStudy(); },
@@ -815,7 +878,7 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   const act = b?.dataset.act;
   // Ya respondida: cualquier clic pasa a la siguiente (con un margen para no saltarla sin querer)
-  if (screen === 'game' && game.answered && act !== 'menu' && act !== 'finish') {
+  if (screen === 'game' && game.answered && !['menu', 'finish', 'size'].includes(act)) {
     if (performance.now() - game.answeredAt > 250) next();
     return;
   }
@@ -826,6 +889,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && app.querySelector('.modal')) return closeSheet();
   if (screen !== 'game' || e.repeat) return;
   if (e.key === 'Escape') return game.infinite ? finish() : showMenu();
+  if (e.key === '+' || e.key === '=') return changeSize(1);
+  if (e.key === '-') return changeSize(-1);
   if (game.answered) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
